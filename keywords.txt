@@ -1,0 +1,53 @@
+#######################################
+# Syntax Coloring Map For CAP1293_thijs
+#######################################
+# Class (KEYWORD1)
+#######################################
+
+CAP1293_thijs	KEYWORD1
+_CAP1293_thijs_base	KEYWORD1
+
+# CAP1293_ADDR_ENUM	KEYWORD2
+
+CAP1293_ERR_RETURN_TYPE	KEYWORD2
+CAP1293_ERR_RETURN_TYPE_default	KEYWORD2
+
+#######################################
+# Class properties (LITERAL1)
+#######################################
+
+slaveAddress	LITERAL1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################	
+
+CAP1293debugPrint	KEYWORD2
+
+init			KEYWORD2
+requestReadBytes	KEYWORD2
+
+_errGood			KEYWORD2
+
+getTempInt	KEYWORD2
+
+setThighInt	KEYWORD2
+
+getThighInt	KEYWORD2
+
+connectionCheck	KEYWORD2
+printConfig		KEYWORD2
+resetConfig		KEYWORD2
+
+getOneShotWait	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+CAP1293_return_esp_err_t		LITERAL1
+CAP1293_return_i2c_status_e	LITERAL1
+
+CAP1293_ADDR_A0_to_GND		LITERAL1
+
+CAP1293_TEMP		LITERAL1

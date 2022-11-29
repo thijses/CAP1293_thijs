@@ -1,0 +1,21 @@
+{
+  "name": "CAP1293_thijs",
+  "version": "1.0.0",
+  "description": "A library for the CAP1293 touch sensor for atmega328p, ESP32, MSP430 or STM32 (or Wire.h)",
+  "keywords": "CAP1293, I2C",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/thijses/CAP1293_thijs.git"
+  },
+  "authors":
+  [
+    {
+      "name": "Thijs van Liempd",
+      "email": "tttthijses@gmail.com"
+    }
+  ],
+  "frameworks": "arduino",
+  "platforms": ["atmelavr", "espressif32", "timsp430", "ststm32"],
+  "headers": "CAP1293_thijs.h"
+}
