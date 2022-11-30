@@ -31,6 +31,8 @@ Basics (oddities):
 - there are several (sometimes redundant) sensitivity settings, please read through the Sensitivity explenation below
 - input 2 can be used as a Signal-Guard, improving the performance of the pads it encompasses (basically a must-have for proximity sensors)
 - the INT bit in the Main Control register (linked to ALARM pin), must be cleared for status registers (other flags like CAP1293_TOUCH_FLAG_REG) to be reset.
+- if you touch 1 sensor input, touch flag 1 and INT bit go high, you clear the INT bit, and then you touch another input (while still holding the first), it does NOT update the touch flags correctly
+   (but the Multiple-Touch flag does go high)
 
 Power modes:
 - Active is the regular(/highest) mode
@@ -55,7 +57,7 @@ Timings:
 
 Sensitivity:
 - 'Base count' is used to compensate for the natural capacitance of the sensing pad
-  the base count bytes can be found CAP1293_BASE_COUNT_x_REG and should be shifted by CAP1293_SENS_BASE_SHIFT_bits to produce the actual base count value
+  the base count bytes can be found CAP1293_BASE_COUNT_x_REG and should be left-shifted by CAP1293_SENS_BASE_SHIFT_bits to produce the actual base count value
   By default, the BASE_SHIFT is set to the max 8 bits. It's not clearly stated whether BASE_SHIFT if automatically set, but considering the ideal
   At a sample time of 320us, the ideal base count is 3200. To maintain similar base count resolution, BASE_SHIFT = 5+(SAMPLE_TM_bits)
   Out Of Limit base count refers to a base count value that is more than +-12.5% off from the ideal value
@@ -149,14 +151,15 @@ To write:
 #define CAP1293_INVALID_REG_ADDR  0x70 // NOT IN DATASHEET, this is just for my own code. There should be nothing in the memory at this location
 
 // (status registers)
-#define CAP1293_GEN_FLAG_REG      0x02  // (R/W?) General Status register, see defined _bits below   NOTE: datasheet has typo, this register is both defined as R/W and R only, I suspect R only is correct
+#define CAP1293_GEN_STATUS_REG    0x02  // (R/W?) General Status register, see defined _bits below   NOTE: datasheet has typo, this register is both defined as R/W and R only, I suspect R only is correct
 #define CAP1293_NOISE_FLAG_REG    0x0A  // (R) Noise Flag Status register (per sensor), 3LSBits are 3 sensor channels respectively
 
 // (sensor output registers)
 #define CAP1293_TOUCH_FLAG_REG    0x03  // (R) Sensor Input (touch) Status register (per sensor), 3LSBits are 3 sensor channels respectively
-#define CAP1293_DELTA_COUNT_1_REG 0x10  // (R) sensor 1 Delta Count register (SIGNED int8_t) interpret as(???): (measured_count - base_count)>>DELTA_SENSE
-#define CAP1293_DELTA_COUNT_2_REG 0x11  // (R) sensor 1 Delta Count register (SIGNED int8_t)
-#define CAP1293_DELTA_COUNT_3_REG 0x12  // (R) sensor 1 Delta Count register (SIGNED int8_t)
+#define CAP1293_DELTA_COUNT_REG_1 0x10  // (R) sensor 1 Delta Count register (SIGNED int8_t) interpret as(???): (measured_count - base_count)>>DELTA_SENSE
+// #define CAP1293_DELTA_COUNT_1_REG 0x10  // (R) sensor 1 Delta Count register (SIGNED int8_t) interpret as(???): (measured_count - base_count)>>DELTA_SENSE
+// #define CAP1293_DELTA_COUNT_2_REG 0x11  // (R) sensor 1 Delta Count register (SIGNED int8_t) interpret as(???): (measured_count - base_count)>>DELTA_SENSE
+// #define CAP1293_DELTA_COUNT_3_REG 0x12  // (R) sensor 1 Delta Count register (SIGNED int8_t) interpret as(???): (measured_count - base_count)>>DELTA_SENSE
 
 // Configuration registers
 #define CAP1293_MAIN_CTRL_REG     0x00  // (R/W) Main Control register
@@ -183,9 +186,10 @@ To write:
 #define CAP1293_CALIB_ACTIV_REG   0x26  // (R/W) Calibration Activate and Status register (per sensor), 3LSBits are 3 sensor channels respectively. Read for status/faillure, write 1 to trigger calibration
 #define CAP1293_BASE_CNT_OOL_REG  0x2E  // (R) Base Count Out Of Limit register, 3 LSBits indicate whether the (auto-calibrated) base count is Out Of Limit (per sensor)
 #define CAP1293_RCLB_CONF_REG     0x2F  // (R/W) Recalibration Configuration register, see defined _bits below
-#define CAP1293_THRSH_1_REG       0x30  // (R/W) touch Threshold (for sensor 1) register, threshold (of delta, not measurement) that constitutes a touch, 7bit value (applied to int8_t delta value)
-#define CAP1293_THRSH_2_REG       0x31  // (R/W) touch Threshold (for sensor 2) register, threshold (of delta, not measurement) that constitutes a touch, 7bit value
-#define CAP1293_THRSH_3_REG       0x32  // (R/W) touch Threshold (for sensor 3) register, threshold (of delta, not measurement) that constitutes a touch, 7bit value
+#define CAP1293_THRSH_REG_1       0x30  // (R/W) touch Threshold register for sensor 1, threshold (of delta, not measurement) that constitutes a touch, 7bit value (applied to int8_t delta value)
+// #define CAP1293_THRSH_1_REG       0x30  // (R/W) touch Threshold register for sensor 1, threshold (of delta, not measurement) that constitutes a touch, 7bit value (applied to int8_t delta value)
+// #define CAP1293_THRSH_2_REG       0x31  // (R/W) touch Threshold register for sensor 2, threshold (of delta, not measurement) that constitutes a touch, 7bit value (applied to int8_t delta value)
+// #define CAP1293_THRSH_3_REG       0x32  // (R/W) touch Threshold register for sensor 3, threshold (of delta, not measurement) that constitutes a touch, 7bit value (applied to int8_t delta value)
 #define CAP1293_NOISE_THRSH_REG   0x38  // (R/W) Noise Threshold register, 2bit value, see CAP1293_NOISE_THRSH_ENUM for 2bit contents
 
 // Standby Configuration registers:
@@ -195,9 +199,10 @@ To write:
 #define CAP1293_STBY_THRSH_REG    0x43  // (R/W) Standby Threshold register, count-delta threshold that constitutes a touch, 7bit value
 
 // Base Count Regsiters:
-#define CAP1293_BASE_COUNT_1_REG  0x50  // (R) sensor 1 Base Count (reference count value) register, default = 0xC8
-#define CAP1293_BASE_COUNT_2_REG  0x51  // (R) sensor 2 Base Count (reference count value) register, default = 0xC8
-#define CAP1293_BASE_COUNT_3_REG  0x52  // (R) sensor 3 Base Count (reference count value) register, default = 0xC8
+#define CAP1293_BASE_COUNT_REG_1  0x50  // (R) sensor 1 Base Count (reference count value) register, default = 0xC8
+// #define CAP1293_BASE_COUNT_1_REG  0x50  // (R) sensor 1 Base Count (reference count value) register, default = 0xC8
+// #define CAP1293_BASE_COUNT_2_REG  0x51  // (R) sensor 2 Base Count (reference count value) register, default = 0xC8
+// #define CAP1293_BASE_COUNT_3_REG  0x52  // (R) sensor 3 Base Count (reference count value) register, default = 0xC8
 
 // Power Button Regsiters:
 #define CAP1293_PWR_BTN_SEL_REG   0x60  // (R/W) Power Button (selection) register, 2bit value, can be 0, 1 or 2
@@ -205,9 +210,10 @@ To write:
 
 // Calibration Regsiters:
 #define CAP1293_CALIB_CONF_REG    0x80  // (R/W) Calibration Sensitivity Configuration register, see defined _bits below
-#define CAP1293_CALIB_1_MSB_REG   0xB1  // (R) sensor 1 Calibration MSBs register
-#define CAP1293_CALIB_2_MSB_REG   0xB2  // (R) sensor 2 Calibration MSBs register
-#define CAP1293_CALIB_3_MSB_REG   0xB3  // (R) sensor 3 Calibration MSBs register
+#define CAP1293_CALIB_MSB_REG_1   0xB1  // (R) sensor 1 Calibration MSBs register
+// #define CAP1293_CALIB_1_MSB_REG   0xB1  // (R) sensor 1 Calibration MSBs register
+// #define CAP1293_CALIB_2_MSB_REG   0xB2  // (R) sensor 2 Calibration MSBs register
+// #define CAP1293_CALIB_3_MSB_REG   0xB3  // (R) sensor 3 Calibration MSBs register
 #define CAP1293_CALIB_x_LSB_REG   0xB9  // (R) all sensor inputs Calibration LSBs register
 
 // ID Regsiters: (Read only)
@@ -217,12 +223,12 @@ To write:
 
 
 // General Status register bits: (read only?)
-#define CAP1293_GEN_FLAG_BC_OUT_bits      0b01000000 // BC_OUT indicates base count Out Of Limit for one or more sensor inputs
-#define CAP1293_GEN_FLAG_ACAL_FAIL_bits   0b00100000 // ACAL_FAIL indicates analog calibration faillure for one or more sensor inputs
-#define CAP1293_GEN_FLAG_PWR_bits         0b00010000 // PWR is the output flag for the Power-Button feature. Linked to the INT bit (main control register) in some way
-#define CAP1293_GEN_FLAG_MULT_bits        0b00000100 // MULT indicates that Multiple Touch output ("blocking"), INT bit should not be affected
-#define CAP1293_GEN_FLAG_MTP_bits         0b00000010 // MTP indicates that the Multiple Touch Pattern conditions were met (threshold crossed / pattern acceptable) for INT bit behaviour, see MPT_ALERT bit
-#define CAP1293_GEN_FLAG_TOUCH_bits       0b00000001 // TOUCH indicates a touch is detected for one or more sensor inputs (but you should really just check CAP1293_TOUCH_FLAG_REG)
+#define CAP1293_GEN_STATUS_BC_OUT_bits    0b01000000 // BC_OUT indicates base count Out Of Limit for one or more sensor inputs
+#define CAP1293_GEN_STATUS_ACAL_FAIL_bits 0b00100000 // ACAL_FAIL indicates analog calibration faillure for one or more sensor inputs
+#define CAP1293_GEN_STATUS_PWR_bits       0b00010000 // PWR is the output flag for the Power-Button feature. Linked to the INT bit (main control register) in some way
+#define CAP1293_GEN_STATUS_MULT_bits      0b00000100 // MULT indicates that Multiple Touch output ("blocking"), INT bit should not be affected
+#define CAP1293_GEN_STATUS_MTP_bits       0b00000010 // MTP indicates that the Multiple Touch Pattern conditions were met (threshold crossed / pattern acceptable) for INT bit behaviour, see MPT_ALERT bit
+#define CAP1293_GEN_STATUS_TOUCH_bits     0b00000001 // TOUCH indicates a touch is detected for one or more sensor inputs (but you should really just check CAP1293_TOUCH_FLAG_REG)
 
 // Sensitivity Control register bits:
 #define CAP1293_SENS_DELTA_SENSE_bits     0b01110000 // DELTA_SENSE is a 3bit value which determines the sensor data right-shift, so sensitivity multiplier = (128>>(STBY_SENS))
@@ -231,7 +237,7 @@ To write:
 // Main Control register:
 #define CAP1293_MAIN_CTRL_GAIN_bits       0b11000000 // GAIN is analog capacitance amplification for sensor inputs (in Active mode), 2bit value where gain = (1<<(GAIN))
 #define CAP1293_MAIN_CTRL_PWR_STBY_bits   0b00100000 // STBY power mode enable (instead of Active mode)
-#define CAP1293_MAIN_CTRL_PRW_DSLEEP_bits 0b00010000 // DSPEEP power mode enable (overrules STBY and COMBO)
+#define CAP1293_MAIN_CTRL_PRW_DSLEEP_bits 0b00010000 // DSLEEP power mode enable (overrules STBY and COMBO)
 #define CAP1293_MAIN_CTRL_STBY_GAIN_bits  0b00001100 // C_GAIN is analog capacitance amplification for sensor inputs (in Standby mode), 2bit value where gain = (1<<(GAIN))
 #define CAP1293_MAIN_CTRL_PWR_COMBO_bits  0b00000010 // COMBO power mode enable (overrules STBY)
 #define CAP1293_MAIN_CTRL_INT_bits        0b00000001 // INT interrupt flag, controls ALERT pin (used to indicate several things). Must be cleared in order to clear other status flags (like CAP1293_TOUCH_FLAG_REG)
@@ -239,14 +245,14 @@ To write:
 // Configuration (1) register bits:
 #define CAP1293_CONF_1_TIMOUT_bits        0b10000000 // TIMOUT enabled SMBus timeout feature. SMBus interface is reset if CLK is low for 30ms or 
 #define CAP1293_CONF_1_DIS_DIG_NOISE_bits 0b00100000 // DIS_DIG_NOISE disables using the digital noise threshold (to avoid premature auto-recalibration?) (default disabled)
-#define CAP1293_CONF_1_DIS_ANA_NOISE_bits 0b00010000 // DIS_ANA_NOISE means if low-freq noise is detected, "the delta count on that channel is set to 0" (default enabled)
+#define CAP1293_CONF_1_DIS_ANA_NOISE_bits 0b00010000 // DIS_ANA_NOISE whether if low-freq noise is detected, "the delta count on that channel is set to 0" (default enabled)
 #define CAP1293_CONF_1_MAX_DUR_EN_bits    0b00001000 // MAX_DUR_EN enables auto-recalibration if a touch is detected for too long (see CAP1293_TIMER_CONF_MAX_DUR_bits) (default disabled)
 // Configuration 2 register bits:
 #define CAP1293_CONF_2_BC_OUT_RECAL_bits  0b01000000 // BC_OUT_RECAL enabled retying analog-calib. (instead of falling back to OOL-base-count) when BC_OUTx bit is set (default enabled)
 #define CAP1293_CONF_2_BLK_PWR_CTRL_bits  0b00100000 // BLK_PWR_CTRL determines whether to reduce power consumption near end of sensing cycle (default enabled)
 #define CAP1293_CONF_2_BC_OUT_INT_bits    0b00010000 // BC_OUT_INT enables sending an interrupt if base count is Out Of Limit for one or more sensor inputs (default disabled)
 #define CAP1293_CONF_2_SHOW_RF_NOISE_bits 0b00001000 // SHOW_RF_NOISE disables the low-freq noise from setting the noise status bit(s) (default enabled)
-#define CAP1293_CONF_2_DIS_RF_NOISE_bits  0b00000100 // DIS_RF_NOISE means if RF noise is detected, "the delta count on that channel is set to 0" (default enabled)
+#define CAP1293_CONF_2_DIS_RF_NOISE_bits  0b00000100 // DIS_RF_NOISE whether if RF noise is detected, "the delta count on that channel is set to 0" (default enabled)
 #define CAP1293_CONF_2_ACAL_FAIL_INT_bits 0b00000010 // ACAL_FAIL_INT enables sending an interrupt if analog calibration fails for one or more sensor inputs (default disabled)
 #define CAP1293_CONF_2_REL_INT_bits       0b00000001 // INT_REL_n disables sending an interrupt when a touch is released (default enabled)
 
@@ -296,11 +302,12 @@ To write:
 #define CAP1293_CALIB_CONF_CALSEN_2_bits  0b00001100 // CALSEN2 is the calibration gain for sensor 2, see CAP1293_CALSEN_ENUM for 2bit contents 
 #define CAP1293_CALIB_CONF_CALSEN_1_bits  0b00000011 // CALSEN1 is the calibration gain for sensor 1, see CAP1293_CALSEN_ENUM for 2bit contents 
 
-enum CAP1293_CHANNEL_ENUM : uint8_t { // there are only 3 channels, this enum just helps to avoid misuse
-  CAP1293_CHANNEL_1, // sensor input channel 1
-  CAP1293_CHANNEL_2, // sensor input channel 2
-  CAP1293_CHANNEL_3  // sensor input channel 3
-}; // many registers use 1 bit for each sensor, so this value may be used to bitshift, e.g.:  chan_1_bit = (1<<CAP1293_CHANNEL_1)
+//// to be implemented (cleanly)?
+// enum CAP1293_CHANNEL_MASK_ENUM : uint8_t { // many registers use 1 bit for each sensor, so you can also just bitshift, e.g.:  chan_1_bit = (1<<channel_index)
+//   CAP1293_CHANNEL_1_MASK = 0b00000001, // sensor input channel 1 bitmask
+//   CAP1293_CHANNEL_2_MASK = 0b00000010, // sensor input channel 2 bitmask
+//   CAP1293_CHANNEL_3_MASK = 0b00000100  // sensor input channel 3 bitmask
+// }; 
 
 enum CAP1293_MAX_DUR_RECAL_ENUM : uint8_t { // 4bit value to determine how long a touch can be detected before it triggers an auto-recalibration
   CAP1293_MAX_DUR_RECAL_560, // 560ms
@@ -432,7 +439,7 @@ class CAP1293_thijs : public _CAP1293_thijs_base
 
   /**
    * (private) overwrite a portion (mask) of a register without affecting the rest of it
-   * @param registerToRead register byte (see list of defines at top)
+   * @param regAddress register byte (see list of defines at top)
    * @param newVal value (partial byte) to write into the block
    * @param mask which bits to affect
    * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
@@ -440,8 +447,8 @@ class CAP1293_thijs : public _CAP1293_thijs_base
    */
   CAP1293_ERR_RETURN_TYPE _setRegBits(uint8_t regAddress, uint8_t newVal, uint8_t mask, bool useCache=false) {
     CAP1293_ERR_RETURN_TYPE err = CAP1293_ERR_RETURN_TYPE_OK;
-    if( ! (useCache && (regAddress == _readBuffAddress))) { // normally true
-      err = requestReadBytes(regAddress, &_readBuff, 1); _readBuffAddress = regAddress; // fetch the whole block
+    if( ! (useCache && (regAddress == _readBuffAddress))) { // if cache can't be used (normally true)
+      err = requestReadBytes(regAddress, &_readBuff, 1); _readBuffAddress = regAddress; // read into cache
       if(!_errGood(err)) { CAP1293debugPrint("_setRegBits() read/write error!"); _readBuffAddress = CAP1293_INVALID_REG_ADDR; return(err); }
     }
     _readBuff &= ~mask;            // excise old data
@@ -451,94 +458,214 @@ class CAP1293_thijs : public _CAP1293_thijs_base
     return(err);
   }
 
-  // // editing the conf register can be done using the functions below, or you can do something manually like: "writeBytes(CAP1293_CONF, confRawBytes, 2)"
-  // // MSByte of CONF register:
-  // CAP1293_ERR_RETURN_TYPE setSD(bool newValue) { // ShutDown mode    default=0
-  //   uint8_t currentReg;
-  //   requestReadBytes(CAP1293_CONF, &currentReg, 1); // bit of a hack, only read the MSByte
-  //   currentReg &= ~CAP1293_SD_bits; //erase old value
-  //   currentReg |= (newValue * CAP1293_SD_bits); //insert new value
-  //   return(writeBytes(CAP1293_CONF, &currentReg, 1));
-  // }
-  // CAP1293_ERR_RETURN_TYPE setTM(bool newValue) { // Thermostat Mode    default=0
-  //   uint8_t currentReg;
-  //   requestReadBytes(CAP1293_CONF, &currentReg, 1); // bit of a hack, only read the MSByte
-  //   currentReg &= ~CAP1293_TM_bits; //erase old value
-  //   currentReg |= (newValue * CAP1293_TM_bits); //insert new value
-  //   return(writeBytes(CAP1293_CONF, &currentReg, 1));
-  // }
-  // CAP1293_ERR_RETURN_TYPE setPOL(bool newValue) { // POLarity    default=0
-  //   uint8_t currentReg;
-  //   requestReadBytes(CAP1293_CONF, &currentReg, 1); // bit of a hack, only read the MSByte
-  //   currentReg &= ~CAP1293_POL_bits; //erase old value
-  //   currentReg |= (newValue * CAP1293_POL_bits); //insert new value
-  //   return(writeBytes(CAP1293_CONF, &currentReg, 1));
-  // }
-  // /**
-  //  * set the Fault Queue threshold
-  //  * @param newValue 2-bit value, results in [1,2,4,6] fault threshhold respectively 
-  //  * @return (bool or esp_err_t or i2c_status_e, see on defines at top) whether it wrote successfully
-  //  */
-  // CAP1293_ERR_RETURN_TYPE setFQ(uint8_t newValue) { // Fault Queue    default=0 (= 1 consecutive faults)
-  //   uint8_t currentReg;
-  //   requestReadBytes(CAP1293_CONF, &currentReg, 1); // bit of a hack, only read the MSByte
-  //   currentReg &= ~CAP1293_FQ_bits; //erase old value
-  //   currentReg |= ((newValue<<3) & CAP1293_FQ_bits); //insert new value
-  //   return(writeBytes(CAP1293_CONF, &currentReg, 1));
-  // }
-  // /**
-  //  * set the One-Shot bit. Writing a 1 to it while in ShutDown mode triggers a single conversion.
-  //  *  During the conversion it reads as 0, once it's done it reads as 1. See datasheet for details
-  //  * @param newValue (boolean) bit 
-  //  * @return (bool or esp_err_t or i2c_status_e, see on defines at top) whether it wrote successfully
-  //  */
-  // CAP1293_ERR_RETURN_TYPE setOS(bool newValue) { // One-Shot bit    default=0
-  //   uint8_t currentReg;
-  //   requestReadBytes(CAP1293_CONF, &currentReg, 1); // bit of a hack, only read the MSByte
-  //   currentReg &= ~CAP1293_OS_bits; //erase old value
-  //   currentReg |= (newValue * CAP1293_OS_bits); //insert new value
-  //   return(writeBytes(CAP1293_CONF, &currentReg, 1));
-  // }
-  // // LSByte of CONF register:
-  // CAP1293_ERR_RETURN_TYPE setEM(bool newValue) { // Extended Mode (13bit)    default=0
-  //   uint8_t currentReg[2];
-  //   requestReadBytes(CAP1293_CONF, currentReg, 2); // to get to the LSByte you have to read the whole register
-  //   currentReg[1] &= ~CAP1293_EM_bits; //erase old value
-  //   currentReg[1] |= (newValue * CAP1293_EM_bits); //insert new value
-  //   return(writeBytes(CAP1293_CONF, currentReg, 2));
-  // }
-  // /**
-  //  * set the Conversion Rate
-  //  * @param newValue 2-bit value, results in [0.25,1,4,8] conversions/sec respectively
-  //  * @return (bool or esp_err_t or i2c_status_e, see on defines at top) whether it wrote successfully
-  //  */
-  // CAP1293_ERR_RETURN_TYPE setCR(uint8_t newValue) { // Conversion Rate    default=2 (= 4 conv/sec)
-  //   uint8_t currentReg[2];
-  //   requestReadBytes(CAP1293_CONF, currentReg, 2); // to get to the LSByte you have to read the whole register
-  //   currentReg[1] &= ~CAP1293_CR_bits; //erase old value
-  //   currentReg[1] |= ((newValue<<6) & CAP1293_CR_bits); //insert new value
-  //   return(writeBytes(CAP1293_CONF, currentReg, 2));
-  // }
+  /**
+   * (private) request a specific register and read 1 byte into _readBuff (optional cache)
+   * @param regAddress register byte (see list of defines at top)
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return whether it wrote/read successfully
+   */
+  CAP1293_ERR_RETURN_TYPE _readByteRetErr(uint8_t regAddress, bool useCache=false) {
+    if( ! (useCache && (regAddress == _readBuffAddress))) { // if cache can't be used (normally true)
+      CAP1293_ERR_RETURN_TYPE err = requestReadBytes(regAddress, &_readBuff, 1); _readBuffAddress = regAddress; // read into cache
+      if(!_errGood(err)) { CAP1293debugPrint("_readByteRetErr read/write error: "); _readBuffAddress = CAP1293_INVALID_REG_ADDR; return(err); }
+    } /*else*/ return(CAP1293_ERR_RETURN_TYPE_OK); // if cache was successfully used, this function does absolutely nothing
+  }
+  /**
+   * (private) request a specific register and read 1 byte (optional cache)
+   * @param regAddress register byte (see list of defines at top)
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return the byte it read (unless the read failed!)
+   */
+  uint8_t _readByteRetVal(uint8_t regAddress, bool useCache=false) { // (mostly a macro)
+    CAP1293_ERR_RETURN_TYPE err = _readByteRetErr(regAddress, useCache);
+    if(!_errGood(err)) { CAP1293debugPrint("_readByteRetVal read/write error: " /* +debugName */); }
+    return(_readBuff);
+  }
 
-  // // MSByte of CONF register:
-  // bool getSD() { uint8_t currentReg; requestReadBytes(CAP1293_CONF, &currentReg, 1); return(currentReg & CAP1293_SD_bits); } // ShutDown mode
-  // bool getTM() { uint8_t currentReg; requestReadBytes(CAP1293_CONF, &currentReg, 1); return(currentReg & CAP1293_TM_bits); } // Thermostat Mode
-  // bool getPOL() { uint8_t currentReg; requestReadBytes(CAP1293_CONF, &currentReg, 1); return(currentReg & CAP1293_POL_bits); } // POLarity
+  /**
+   * (private) retrieve one bit from a register (this version of the function DOES NOT let you check for I2C errors)
+   * @param mask which bit to retrieve
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return the bit (as a boolean)
+   */
+  bool _getOneBit(uint8_t regAddress, uint8_t mask, bool useCache=false) { return((_readByteRetVal(regAddress, useCache) & CAP1293_MAIN_CTRL_PWR_STBY_bits) != 0); } // (just a macro)
+
+/////////////////////////////////////////////////////////////////////////////////////// get functions: //////////////////////////////////////////////////////////
+
   // /**
-  //  * retrieve the Fault Queue threshold
-  //  * @return 2-bit value, results in [1,2,4,6] fault threshhold respectively 
+  //  * retrieve ... register (this version of the function lets you check for I2C errors)
+  //  * @param readBuff byte reference to put the result in
+  //  * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+  //  * @return (bool or esp_err_t or i2c_status_e, see on defines at top) whether it wrote/read successfully
   //  */
-  // uint8_t getFQ() { uint8_t currentReg; requestReadBytes(CAP1293_CONF, &currentReg, 1); return((currentReg & CAP1293_FQ_bits) >> 3); } // Fault Queue
-  // uint8_t getRES() { uint8_t currentReg; requestReadBytes(CAP1293_CONF, &currentReg, 1); return((currentReg & CAP1293_RES_bits) >> 5); } // RESolution (READ ONLY). Should always return 3 (0x03 0b00000011) for CAP1293
-  // bool getOS() { uint8_t currentReg; requestReadBytes(CAP1293_CONF, &currentReg, 1); return(currentReg & CAP1293_OS_bits); } // One-Shot
-  // // LSByte of CONF register:
-  // bool getEM() { uint8_t currentReg[2]; requestReadBytes(CAP1293_CONF, currentReg, 2); return(currentReg[1] & CAP1293_EM_bits); } // Extended Mode (13bit)
-  // bool getAL() { uint8_t currentReg[2]; requestReadBytes(CAP1293_CONF, currentReg, 2); return(currentReg[1] & CAP1293_AL_bits); } // Alert (READ ONLY)
+  // CAP1293_ERR_RETURN_TYPE get_(uint8_t& readBuff, bool useCache=false) { return(_readByteRetErr(  , useCache)); } // (just a macro)
   // /**
-  //  * retrieve the Conversion Rate
-  //  * @return 2-bit value, results in [0.25,1,4,8] conversions/sec respectively
+  //  * retrieve ... register (this version of the function DOES NOT let you check for I2C errors)
+  //  * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+  //  * @return the .... byte
   //  */
-  // uint8_t getCR() { uint8_t currentReg[2]; requestReadBytes(CAP1293_CONF, currentReg, 2); return((currentReg[1] & CAP1293_CR_bits) >> 6); } // Conversion Rate 2-bit value, results in [0.25,1,4,8] conversions/sec respectively
+  // uint8_t get_(bool useCache=false) { return(_readByteRetVal(  , useCache)); } // (just a macro)
+
+  
+  /**
+   * retrieve Main Control register (this version of the function lets you check for I2C errors)
+   * @param readBuff byte reference to put the result in. See CAP1293_MAIN_CTRL_x_bits for contents
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return (bool or esp_err_t or i2c_status_e, see on defines at top) whether it wrote/read successfully
+   */
+  CAP1293_ERR_RETURN_TYPE getMainControl(uint8_t& readBuff, bool useCache=false) { return(_readByteRetErr(CAP1293_MAIN_CTRL_REG, useCache)); } // (just a macro)
+  /**
+   * retrieve Main Control register (this version of the function DOES NOT let you check for I2C errors)
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return the Main Control byte. See CAP1293_MAIN_CTRL_x_bits for contents
+   */
+  uint8_t getMainControl(bool useCache=false) { return(_readByteRetVal(CAP1293_MAIN_CTRL_REG, useCache)); } // (just a macro)
+  /**
+   * retrieve GAIN bits from the Main Control register (this function DOES NOT let you check for I2C errors)
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return the GAIN bits, amplification = (1<<(GAIN))
+   */
+  uint8_t getMainControl_GAIN(bool useCache=false) { return((_readByteRetVal(CAP1293_MAIN_CTRL_REG, useCache) & CAP1293_MAIN_CTRL_GAIN_bits) >> 6); } // (just a macro)
+  /**
+   * retrieve STBY bit from the Main Control register (this function DOES NOT let you check for I2C errors)
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return the STBY bit, 1 means Standby power mode is active (unless overruled by Combo or Deep Sleep)
+   */
+  bool getMainControl_STBY(bool useCache=false) { return(_getOneBit(CAP1293_MAIN_CTRL_REG, CAP1293_MAIN_CTRL_PWR_STBY_bits, useCache)); } // (just a macro)
+  /**
+   * retrieve DSLEEP bit from the Main Control register (this function DOES NOT let you check for I2C errors)
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return the STBY bit, 1 means Deep Sleep power mode is active
+   */
+  bool getMainControl_DSLEEP(bool useCache=false) { return(_getOneBit(CAP1293_MAIN_CTRL_REG, CAP1293_MAIN_CTRL_PRW_DSLEEP_bits, useCache)); } // (just a macro)
+  /**
+   * retrieve C_GAIN (Standby gain) bits from the Main Control register (this function DOES NOT let you check for I2C errors)
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return the C_GAIN bits, amplification = (1<<(GAIN))
+   */
+  uint8_t getMainControl_C_GAIN(bool useCache=false) { return((_readByteRetVal(CAP1293_MAIN_CTRL_REG, useCache) & CAP1293_MAIN_CTRL_STBY_GAIN_bits) >> 2); } // (just a macro)
+  /**
+   * retrieve DSLEEP bit from the Main Control register (this function DOES NOT let you check for I2C errors)
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return the STBY bit, 1 means Combo power mode is active (unless overruled by Deep Sleep)
+   */
+  bool getMainControl_COMBO(bool useCache=false) { return(_getOneBit(CAP1293_MAIN_CTRL_REG, CAP1293_MAIN_CTRL_PWR_COMBO_bits, useCache)); } // (just a macro)
+  /**
+   * retrieve INT bit from the Main Control register (this function DOES NOT let you check for I2C errors)
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return the INT bit, directly relates to ALERT pin
+   */
+  bool getMainControl_INT(bool useCache=false) { return(_getOneBit(CAP1293_MAIN_CTRL_REG, CAP1293_MAIN_CTRL_PWR_COMBO_bits, useCache)); } // (just a macro)
+  /**
+   * retrieve General Status register (this version of the function lets you check for I2C errors)
+   * @param readBuff byte reference to put the result in. See CAP1293_GEN_STATUS_x_bits for contents
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return (bool or esp_err_t or i2c_status_e, see on defines at top) whether it wrote/read successfully
+   */
+  CAP1293_ERR_RETURN_TYPE getGenStatus(uint8_t& readBuff, bool useCache=false) { return(_readByteRetErr(CAP1293_GEN_STATUS_REG, useCache)); } // (just a macro)
+  /**
+   * retrieve General Status register (this version of the function DOES NOT let you check for I2C errors)
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return the General Status byte. See CAP1293_GEN_STATUS_x_bits for contents
+   */
+  uint8_t getGenStatus(bool useCache=false) { return(_readByteRetVal(CAP1293_GEN_STATUS_REG, useCache)); } // (just a macro)
+  /**
+   * retrieve BC_OUT bit from the General Status register (this function DOES NOT let you check for I2C errors)
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return the BC_OUT bit, indicating Base Count is Out Of Limit
+   */
+  bool getGenStatus_BC_OUT(bool useCache=false) { return(_getOneBit(CAP1293_GEN_STATUS_REG, CAP1293_GEN_STATUS_BC_OUT_bits, useCache)); } // (just a macro)
+  /**
+   * retrieve ACAL_FAIL bit from the General Status register (this function DOES NOT let you check for I2C errors)
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return the ACAL_FAIL bit, indicating Analog Calibration faillure
+   */
+  bool getGenStatus_ACAL_FAIL(bool useCache=false) { return(_getOneBit(CAP1293_GEN_STATUS_REG, CAP1293_GEN_STATUS_ACAL_FAIL_bits, useCache)); } // (just a macro)
+  /**
+   * retrieve PWR bit from the General Status register (this function DOES NOT let you check for I2C errors)
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return the PWR bit, indicating Power-Button was detected (conditions were met)
+   */
+  bool getGenStatus_PWR(bool useCache=false) { return(_getOneBit(CAP1293_GEN_STATUS_REG, CAP1293_GEN_STATUS_PWR_bits, useCache)); } // (just a macro)
+  /**
+   * retrieve MULT bit from the General Status register (this function DOES NOT let you check for I2C errors)
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return the MULT bit, indicating Multiple-Touch was detected (conditions were met)
+   */
+  bool getGenStatus_MULT(bool useCache=false) { return(_getOneBit(CAP1293_GEN_STATUS_REG, CAP1293_GEN_STATUS_MULT_bits, useCache)); } // (just a macro)
+  /**
+   * retrieve MTP bit from the General Status register (this function DOES NOT let you check for I2C errors)
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return the MTP bit, indicating Multiple-Touch-Pattern was detected (conditions were met)
+   */
+  bool getGenStatus_MTP(bool useCache=false) { return(_getOneBit(CAP1293_GEN_STATUS_REG, CAP1293_GEN_STATUS_MTP_bits, useCache)); } // (just a macro)
+  /**
+   * retrieve TOUCH bit from the General Status register (this function DOES NOT let you check for I2C errors)
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return the TOUCH bit, indicating a touch was detected (see touch flags register for which one)
+   */
+  bool getGenStatus_TOUCH(bool useCache=false) { return(_getOneBit(CAP1293_GEN_STATUS_REG, CAP1293_GEN_STATUS_TOUCH_bits, useCache)); } // (just a macro)
+  /**
+   * retrieve the (individual) touch flags/status register (this version of the function lets you check for I2C errors)
+   * @param readBuff byte reference to put the result in. The 3 LSBits are the 3 sensor inputs respectively
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return (bool or esp_err_t or i2c_status_e, see on defines at top) whether it wrote/read successfully
+   */
+  CAP1293_ERR_RETURN_TYPE getTouchFlags(uint8_t& readBuff, bool useCache=false) { return(_readByteRetErr(CAP1293_TOUCH_FLAG_REG, useCache)); } // (just a macro)
+  /**
+   * retrieve the (individual) touch flags/status byte (this version of the function DOES NOT let you check for I2C errors)
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return the touch flags byte. The 3 LSBits are the 3 sensor inputs respectively
+   */
+  uint8_t getTouchFlags(bool useCache=false) { return(_readByteRetVal(CAP1293_TOUCH_FLAG_REG, useCache)); } // (just a macro)
+  /**
+   * retrieve the (individual) noise flags/status register (this version of the function lets you check for I2C errors)
+   * @param readBuff byte reference to put the result in. The 3 LSBits are the 3 sensor inputs respectively
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return (bool or esp_err_t or i2c_status_e, see on defines at top) whether it wrote/read successfully
+   */
+  CAP1293_ERR_RETURN_TYPE getNoiseFlags(uint8_t& readBuff, bool useCache=false) { return(_readByteRetErr(CAP1293_NOISE_FLAG_REG, useCache)); } // (just a macro)
+  /**
+   * retrieve the (individual) noise flags/status byte (this version of the function DOES NOT let you check for I2C errors)
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return the noise flags byte. The 3 LSBits are the 3 sensor inputs respectively
+   */
+  uint8_t getNoiseFlags(bool useCache=false) { return(_readByteRetVal(CAP1293_NOISE_FLAG_REG, useCache)); } // (just a macro)
+
+  /**
+   * retrieve the (individual) calibration-active flags/status register (this version of the function lets you check for I2C errors)
+   * @param readBuff byte reference to put the result in. The 3 LSBits are the 3 sensor inputs respectively
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return (bool or esp_err_t or i2c_status_e, see on defines at top) whether it wrote/read successfully
+   */
+  CAP1293_ERR_RETURN_TYPE getCalibActive(uint8_t& readBuff, bool useCache=false) { return(_readByteRetErr(CAP1293_CALIB_ACTIV_REG, useCache)); } // (just a macro)
+  /**
+   * retrieve the (individual) calibration-active flags/status byte (this version of the function DOES NOT let you check for I2C errors)
+   * @param useCache (optional!, not recommended, use at own discretion) use data from _readBuff cache (if possible) instead of actually reading it from I2C (to save a little time).
+   * @return the calibration-active flags byte. The 3 LSBits are the 3 sensor inputs respectively
+   */
+  uint8_t getCalibActive(bool useCache=false) { return(_readByteRetVal(CAP1293_CALIB_ACTIV_REG, useCache)); } // (just a macro)
+
+
+  uint16_t getBaseCount(uint8_t sensorIndex) {
+    sensorIndex = (sensorIndex > 2) ? 2 : sensorIndex; // constrain index to the actual number of sensor inputs
+    uint8_t baseCount = _readByteRetVal(CAP1293_BASE_COUNT_REG_1 + sensorIndex);
+    uint8_t baseShift = _readByteRetVal(CAP1293_SENS_REG) & CAP1293_SENS_BASE_SHIFT_bits; // LSnibble
+    uint16_t baseCountReal = (baseCount << min(baseShift, (uint8_t)8));
+    return(baseCountReal);
+  }
+  uint16_t getDeltaCount(uint8_t sensorIndex) {
+    sensorIndex = (sensorIndex > 2) ? 2 : sensorIndex; // constrain index to the actual number of sensor inputs
+    int8_t deltaCount = _readByteRetVal(CAP1293_DELTA_COUNT_REG_1 + sensorIndex);
+    uint8_t deltaSense = (_readByteRetVal(CAP1293_SENS_REG) & CAP1293_SENS_DELTA_SENSE_bits) >> 4;
+    int16_t deltaCountReal = (deltaCount << (7-deltaCountReal));
+    return(deltaCountReal);
+  }
+/////////////////////////////////////////////////////////////////////////////////////// set functions: //////////////////////////////////////////////////////////
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////// debug functions: //////////////////////////////////////////////////////////
 
   /**
    * attempt to retrieve the product ID and manufacturer ID and check if they match the expected values
@@ -556,35 +683,10 @@ class CAP1293_thijs : public _CAP1293_thijs_base
   //  * @return (bool or esp_err_t or i2c_status_e, see on defines at top) whether it wrote successfully
   //  */
   // CAP1293_ERR_RETURN_TYPE printConfig() { // prints contents of CONF register (somewhat efficiently)
-  //   uint8_t readBuff[2]; // instead of calling all the functions above (which may actually take hundreds of millis at the lowest I2C freq this things supports), just get the CONF register once
-  //   CAP1293_ERR_RETURN_TYPE readSuccess = requestReadBytes(CAP1293_CONF, readBuff, 2);
-  //   if(_errGood(readSuccess))
-  //    {
-  //     //Serial.println("printing config: ");
-  //     Serial.print("ShutDown mode: "); Serial.println(readBuff[0] & CAP1293_SD_bits);
-  //     Serial.print("Thermostat Mode: "); Serial.println((readBuff[0] & CAP1293_TM_bits)>>1);
-  //     Serial.print("POLatiry: "); Serial.println((readBuff[0] & CAP1293_POL_bits)>>2);
-  //     static const uint8_t FQbitsToThreshold[4] = {1,2,4,6};
-  //     uint8_t FQbits = (readBuff[0] & CAP1293_FQ_bits)>>3 ; // note: should also prevent array index overflow, by its very nature
-  //     Serial.print("Fault Queue: "); Serial.print(FQbits); Serial.print(" = "); Serial.println(FQbitsToThreshold[FQbits]);
-  //     Serial.print("RESolution (should==3): "); Serial.println((readBuff[0] & CAP1293_RES_bits)>>5);
-  //     Serial.print("One-Shot status: "); Serial.println((readBuff[0] & CAP1293_OS_bits)>>1);
-  //     bool is13bit = readBuff[1] & CAP1293_EM_bits;
-  //     Serial.print("Thermostat Mode: "); Serial.println(is13bit);
-  //     Serial.print("Alert (active==!POL): "); Serial.println((readBuff[1] & CAP1293_AL_bits)>>5);
-  //     static const float CRbitsToThreshold[4] = {0.25,1,4,8};
-  //     uint8_t CRbits = (readBuff[1] & CAP1293_CR_bits)>>6; // note: should also prevent array index overflow, by its very nature
-  //     Serial.print("Convertsion Rate: "); Serial.print(CRbits); Serial.print(" = "); Serial.println(CRbitsToThreshold[CRbits]);
-  //     // also print Thigh and Tlow (assuming 'is13bit' is working correctly):
-  //     int16_t ThighInt = getThighInt(is13bit); // assume that, since the first reading went successfully, this one will as well
-  //     Serial.print("Thigh threshold: "); Serial.print(ThighInt); Serial.print(" = "); Serial.println((float)ThighInt * 0.0625);
-  //     int16_t TlowInt = getTlowInt(is13bit); // assume that, since the first reading went successfully, this one will as well
-  //     Serial.print("Tlow threshold: "); Serial.print(TlowInt); Serial.print(" = "); Serial.println((float)TlowInt * 0.0625);
-  //   } else {
-  //     Serial.println("CAP1293 failed to read CONF register!");
-  //   }
-  //   return(readSuccess);
+  //   // TODO!
   // }
+
+  // reset functions?
 };
 
 #endif  // CAP1293_thijs_h
