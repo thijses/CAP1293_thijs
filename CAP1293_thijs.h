@@ -1,5 +1,5 @@
 
-// datasheet link: ...
+// datasheet link: https://ww1.microchip.com/downloads/aemDocuments/documents/OTH/ProductDocuments/DataSheets/00001566B.pdf
 /*
 
 The CAP1293 operators on I2C at 10~400 kHz (or SMBus, )
