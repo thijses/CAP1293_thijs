@@ -783,7 +783,7 @@ class CAP1293_thijs : public _CAP1293_thijs_base
   CAP1293_MAX_DUR_RECAL_ENUM getMaxDurBits(bool useCache=false) { return(static_cast<CAP1293_MAX_DUR_RECAL_ENUM>((getRptRateBits(useCache) & CAP1293_TIMING_CONF_MAX_DUR_bits) >> 4)); }
   //note: default is 5600
   uint16_t _calcMaxDurMillis(CAP1293_MAX_DUR_RECAL_ENUM maxDurBits) {
-    uint8_t maxDur = static_cast<int8_t>(maxDurBits);
+    uint8_t maxDur = static_cast<uint8_t>(maxDurBits);
     // return((16 + min(maxDur, 4)*8 + min(max(maxDur-4, 0), 5)*16 + min(max(maxDur-9, 0), 6)*32) * 35);
     return((16 + (min(maxDur, (uint8_t)4)<<3) + ((maxDur>4) ? (min(maxDur-4, 5)<<4) : 0) + ((maxDur>9) ? (min(maxDur-9, 6)<<5) : 0)) * 35); // very ugly formula, but it should work
   }
