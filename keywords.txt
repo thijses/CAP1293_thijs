@@ -4,50 +4,411 @@
 # Class (KEYWORD1)
 #######################################
 
-CAP1293_thijs	KEYWORD1
-_CAP1293_thijs_base	KEYWORD1
+CAP1293_thijs											KEYWORD1
+_CAP1293_thijs_base								KEYWORD1
 
-# CAP1293_ADDR_ENUM	KEYWORD2
+CAP1293_MAX_DUR_RECAL_ENUM				KEYWORD1
+CAP1293_SAMP_TM_ENUM							KEYWORD1
+CAP1293_MTP_THRSH_ENUM						KEYWORD1
+CAP1293_RCLB_CONF_NEGDLT_CNT_ENUM	KEYWORD1
+CAP1293_RCLB_CONF_CAL_CFG_ENUM		KEYWORD1
+CAP1293_NOISE_THRSH_ENUM					KEYWORD1
+CAP1293_PWR_BTW_TM_ENUM						KEYWORD1
+CAP1293_CALSEN_ENUM								KEYWORD1
 
-CAP1293_ERR_RETURN_TYPE	KEYWORD2
-CAP1293_ERR_RETURN_TYPE_default	KEYWORD2
+CAP1293_ERR_RETURN_TYPE						KEYWORD1
+CAP1293_ERR_RETURN_TYPE_default		KEYWORD1
 
 #######################################
 # Class properties (LITERAL1)
 #######################################
 
-slaveAddress	LITERAL1
+slaveAddress				LITERAL1
+_readBuff						LITERAL1
+_readBuffAddress		LITERAL1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################	
 
-CAP1293debugPrint	KEYWORD2
+CAP1293debugPrint								KEYWORD2
+CAP1293_channel_bit							KEYWORD2
+CAP1293_constr_index						KEYWORD2
 
-init			KEYWORD2
-requestReadBytes	KEYWORD2
+init														KEYWORD2
+requestReadBytes								KEYWORD2
+onlyReadBytes										KEYWORD2
+writeBytes											KEYWORD2
 
-_errGood			KEYWORD2
+_errGood												KEYWORD2
+_setRegBits											KEYWORD2
+_setRegOneBit										KEYWORD2
+_setChanBit											KEYWORD2
+_getRegRetErr										KEYWORD2
+_getRegRetVal										KEYWORD2
+_getRegOneBit										KEYWORD2
+_getChanBit											KEYWORD2
+_checkIsInStandbyMode						KEYWORD2
+_calcMaxDurMillis								KEYWORD2
+_calcNoiseThresholdPercent			KEYWORD2
+_getAnalogCalibResultMSB				KEYWORD2
+_getAnalogCalibResultLSBall			KEYWORD2
+_getAnalogCalibResultLSB				KEYWORD2
 
-getTempInt	KEYWORD2
+getMainControl									KEYWORD2
+getMainControl_GAIN							KEYWORD2
+getMainControl_STBY							KEYWORD2
+getMainControl_DSLEEP						KEYWORD2
+getMainControl_COMBO_GAIN				KEYWORD2
+getMainControl_COMBO						KEYWORD2
+getMainControl_INT							KEYWORD2
+# getMode												KEYWORD2
+getGenStatus										KEYWORD2
+getGenStatus_BC_OUT							KEYWORD2
+getGenStatus_ACAL_FAIL					KEYWORD2
+getGenStatus_PWR								KEYWORD2
+getGenStatus_MULT								KEYWORD2
+getGenStatus_MTP								KEYWORD2
+getGenStatus_TOUCH							KEYWORD2
+getTouchFlags										KEYWORD2
+getNoiseFlagAll									KEYWORD2
+getNoiseFlag										KEYWORD2
+getCalibOngoingAll							KEYWORD2
+getCalibOngoing									KEYWORD2
+getDeltaCountRaw								KEYWORD2
+getDeltaCountRaw								KEYWORD2
+calcDeltaCountFull							KEYWORD2
+getDeltaCountFull								KEYWORD2
+getSensReg											KEYWORD2
+getActiveSensitivity						KEYWORD2
+getBaseShift										KEYWORD2
+getConf_1												KEYWORD2
+getConf_1_TIMEOUT								KEYWORD2
+getConf_1_DIS_DIG_NOISE					KEYWORD2
+getConf_1_DIS_LF_NOISE					KEYWORD2
+getConf_1_MAX_DUR_EN						KEYWORD2
+getConf_2												KEYWORD2
+getConf_2_BC_OUT_RECAL					KEYWORD2
+getConf_2_BLK_PWR_CTRL					KEYWORD2
+getConf_2_BC_OUT_INT						KEYWORD2
+getConf_2_DIS_LF_FLAG						KEYWORD2
+getConf_2_DIS_RF_NOISE					KEYWORD2
+getConf_2_ACAL_FAIL_INT					KEYWORD2
+getConf_2_REL_INT								KEYWORD2
+getActiveChannelsEnabled				KEYWORD2
+getActiveChannelEnable					KEYWORD2
+getInterruptsEnabled						KEYWORD2
+getInterruptEnable							KEYWORD2
+getRepeatsEnabled								KEYWORD2
+getRepeatEnable									KEYWORD2
+getGuardsEnabled								KEYWORD2
+getGuardEnable									KEYWORD2
+getTimingConfReg								KEYWORD2
+getMaxDurBits										KEYWORD2
+getMaxDurMillis									KEYWORD2
+getRptRateBits									KEYWORD2
+getRptRateMillis								KEYWORD2
+getHoldThresholdBits						KEYWORD2
+getHoldThresholdMillis					KEYWORD2
+getSampConfReg									KEYWORD2
+getAveragingCountBits						KEYWORD2
+getAveragingCount								KEYWORD2
+getActiveSampleTimeBits					KEYWORD2
+getActiveSampleTimeMicros				KEYWORD2
+getActiveSensCycleTimeBits			KEYWORD2
+getActiveSensCycleTimeMillis		KEYWORD2
+getMultipleTouchConfReg					KEYWORD2
+getMultipleTouchEnabled					KEYWORD2
+getMultipleTouchThreshold				KEYWORD2
+getMTPatternConfReg							KEYWORD2
+getMTPatternEnabled							KEYWORD2
+getMTP_thresholdBits						KEYWORD2
+getMTP_thresholdPercent					KEYWORD2
+getMTP_patternVScount						KEYWORD2
+getMTP_INT_EN										KEYWORD2
+getMTP_select_or_count					KEYWORD2
+getMTP_select_or_countBits			KEYWORD2
+calcMTP_count										KEYWORD2
+getBaseCountsOOL								KEYWORD2
+getBaseCountOOL									KEYWORD2
+getRecalibConfReg								KEYWORD2
+getRclbConf_WR_ALL_THR					KEYWORD2
+getRclbConf_INTD_NEG						KEYWORD2
+getRclbConf_NEGDLT_CNTbits			KEYWORD2
+getRclbConf_NEGDLT_CNTval				KEYWORD2
+getRecalibSamplesCyclesBits			KEYWORD2
+calcRecalibSamples							KEYWORD2
+calcRecalibCycles								KEYWORD2
+getActiveTouchThreshRaw					KEYWORD2
+getActiveTouchThreshRaw					KEYWORD2
+calcTouchThreshFull							KEYWORD2
+getActiveTouchThreshFull				KEYWORD2
+getNoiseThresholdReg						KEYWORD2
+getNoiseThreshold								KEYWORD2
+getNoiseThresholdPercent				KEYWORD2
+getStandbyChannelsEnabled				KEYWORD2
+getStandbyChannelEnable					KEYWORD2
+getStandbyConf									KEYWORD2
+getStandbyConf_average_or_sum		KEYWORD2
+getStandbyConf_sample_count			KEYWORD2
+getStandbySampleTimeBits				KEYWORD2
+getStandbySampleTimeMicros			KEYWORD2
+getStandbySensCycleTimeBits			KEYWORD2
+getStandbySensCycleTimeMillis		KEYWORD2
+getStandbySensitivity						KEYWORD2
+getStandbyTouchThreshRaw				KEYWORD2
+getStandbyTouchThreshFull				KEYWORD2
+getBaseCountRaw									KEYWORD2
+calcBaseCountFull								KEYWORD2
+getBaseCountFull								KEYWORD2
+calcIdealBaseCount							KEYWORD2
+# getIdealBaseCount							KEYWORD2
+getPowerButtonSelect						KEYWORD2
+getPwrBtnConf										KEYWORD2
+getPwrBtnConf_STBY_EN						KEYWORD2
+getPwrBtnConf_STBY_TMbits				KEYWORD2
+getPwrBtnConf_STBY_TMmillis			KEYWORD2
+getPwrBtnConf_ACTV_EN						KEYWORD2
+getPwrBtnConf_ACTV_TMbits				KEYWORD2
+getPwrBtnConf_ACTV_TMmillis			KEYWORD2
+getCalibConf										KEYWORD2
+getCalibConf_CALSENbits					KEYWORD2
+getAnalogCalibResult						KEYWORD2
+getProductID										KEYWORD2
+getManufacturerID								KEYWORD2
+getRevision											KEYWORD2
 
-setThighInt	KEYWORD2
+setMainControl									KEYWORD2
+setMainControl_GAIN							KEYWORD2
+setMainControl_STBY							KEYWORD2
+setMainControl_DSLEEP						KEYWORD2
+setMainControl_COMBO_GAIN				KEYWORD2
+setMainControl_COMBO						KEYWORD2
+setMainControl_INT							KEYWORD2
+# setMode												KEYWORD2
+# setGenStatus									KEYWORD2
+setSensReg											KEYWORD2
+setActiveSensitivity						KEYWORD2
+setBaseShift										KEYWORD2
+setConf_1												KEYWORD2
+setConf_1_TIMEOUT								KEYWORD2
+setConf_1_DIS_DIG_NOISE					KEYWORD2
+setConf_1_DIS_LF_NOISE					KEYWORD2
+setConf_1_MAX_DUR_EN						KEYWORD2
+setConf_2												KEYWORD2
+setConf_2_BC_OUT_RECAL					KEYWORD2
+setConf_2_BLK_PWR_CTRL					KEYWORD2
+setConf_2_BC_OUT_INT						KEYWORD2
+setConf_2_DIS_LF_FLAG						KEYWORD2
+setConf_2_DIS_RF_NOISE					KEYWORD2
+setConf_2_ACAL_FAIL_INT					KEYWORD2
+setConf_2_REL_INT								KEYWORD2
+setActiveChannelsEnabled				KEYWORD2
+setActiveChannelEnable					KEYWORD2
+setInterruptsEnabled						KEYWORD2
+setInterruptEnable							KEYWORD2
+setRepeatsEnabled								KEYWORD2
+setRepeatEnable									KEYWORD2
+setGuardsEnabled								KEYWORD2
+setGuardEnable									KEYWORD2
+setTimingConfReg								KEYWORD2
+setMaxDurBits										KEYWORD2
+setRptRateBits									KEYWORD2
+setRptRateMillis								KEYWORD2
+setHoldThresholdBits						KEYWORD2
+setHoldThresholdMillis					KEYWORD2
+setSampConfReg									KEYWORD2
+setAveragingCountBits						KEYWORD2
+setActiveSampleTimeBits					KEYWORD2
+setActiveSensCycleTimeBits			KEYWORD2
+setActiveSensCycleTimeMillis		KEYWORD2
+setMultipleTouchConfReg					KEYWORD2
+setMultipleTouchEnabled					KEYWORD2
+setMultipleTouchThreshold				KEYWORD2
+setMTPatternConfReg							KEYWORD2
+setMTPatternEnabled							KEYWORD2
+setMTP_thresholdBits						KEYWORD2
+setMTP_patternVScount						KEYWORD2
+setMTP_INT_EN										KEYWORD2
+setMTP_select_or_count					KEYWORD2
+calcMTP_bits										KEYWORD2
+setCalibOngoing									KEYWORD2
+startCalibAll										KEYWORD2
+startCalib											KEYWORD2
+setRecalibConfReg								KEYWORD2
+setRclbConf_WR_ALL_THR					KEYWORD2
+setRclbConf_INTD_NEG						KEYWORD2
+setRclbConf_NEGDLT_CNTbits			KEYWORD2
+setRecalibSamplesCyclesBits			KEYWORD2
+setActiveTouchThreshRaw					KEYWORD2
+calcTouchThreshRaw							KEYWORD2
+setActiveTouchThreshFull				KEYWORD2
+setNoiseThresholdReg						KEYWORD2
+setNoiseThreshold								KEYWORD2
+# setNoiseThresholdPercent			KEYWORD2
+setStandbyChannelsEnabled				KEYWORD2
+setStandbyConf									KEYWORD2
+setStandbyConf_average_or_sum		KEYWORD2
+setStandbyConf_sample_count			KEYWORD2
+setStandbySampleTimeBits				KEYWORD2
+setStandbySensCycleTimeBits			KEYWORD2
+setStandbySensCycleTimeMillis		KEYWORD2
+setStandbySensitivity						KEYWORD2
+setStandbyTouchThreshRaw				KEYWORD2
+setStandbyTouchThreshFull				KEYWORD2
+setBaseCountRaw									KEYWORD2
+calcBaseCountRaw								KEYWORD2
+setBaseCountFull								KEYWORD2
+setPowerButtonSelect						KEYWORD2
+setPwrBtnConf										KEYWORD2
+setPwrBtnConf_STBY_EN						KEYWORD2
+setPwrBtnConf_STBY_TMbits				KEYWORD2
+setPwrBtnConf_ACTV_EN						KEYWORD2
+setPwrBtnConf_ACTV_TMbits				KEYWORD2
+setCalibConf										KEYWORD2
+setCalibConf_CALSENbits					KEYWORD2
 
-getThighInt	KEYWORD2
-
-connectionCheck	KEYWORD2
-printConfig		KEYWORD2
-resetConfig		KEYWORD2
-
-getOneShotWait	KEYWORD2
+connectionCheck									KEYWORD2
+# printConfig										KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
 #######################################
 
-CAP1293_return_esp_err_t		LITERAL1
-CAP1293_return_i2c_status_e	LITERAL1
+CAP1293_return_esp_err_t						LITERAL1
+CAP1293_return_i2c_status_e					LITERAL1
 
-CAP1293_ADDR_A0_to_GND		LITERAL1
+CAP1293_BOOT_DELAY_COMM_READY				LITERAL1
+CAP1293_BOOT_DELAY_DATA_READY				LITERAL1
 
-CAP1293_TEMP		LITERAL1
+CAP1293_INVALID_REG_ADDR						LITERAL1
+
+CAP1293_GEN_STATUS_REG							LITERAL1
+CAP1293_NOISE_FLAG_REG							LITERAL1
+
+CAP1293_TOUCH_FLAG_REG							LITERAL1
+CAP1293_DELTA_COUNT_REG_1						LITERAL1
+# CAP1293_DELTA_COUNT_1_REG					LITERAL1
+
+CAP1293_MAIN_CTRL_REG								LITERAL1
+CAP1293_CONF_1_REG									LITERAL1
+CAP1293_CONF_2_REG									LITERAL1
+CAP1293_SENS_REG										LITERAL1
+
+CAP1293_ACTV_CHAN_EN_REG						LITERAL1
+CAP1293_ALERT_EN_REG								LITERAL1
+CAP1293_REPEAT_EN_REG								LITERAL1
+CAP1293_GUARD_EN_REG								LITERAL1
+
+CAP1293_TIMING_CONF_REG							LITERAL1
+CAP1293_HOLD_THRSH_REG							LITERAL1
+CAP1293_SAMP_CONF_REG								LITERAL1
+
+CAP1293_MULT_CONF_REG								LITERAL1
+CAP1293_PTRN_CONF_REG								LITERAL1
+CAP1293_PTRN_SEL_REG								LITERAL1
+
+CAP1293_CALIB_ACTIV_REG							LITERAL1
+CAP1293_BASE_CNT_OOL_REG						LITERAL1
+CAP1293_RCLB_CONF_REG								LITERAL1
+CAP1293_TOUCH_THRSH_REG_1						LITERAL1
+# CAP1293_TOUCH_THRSH_1_REG					LITERAL1
+CAP1293_NOISE_THRSH_REG							LITERAL1
+
+CAP1293_STBY_CHAN_EN_REG						LITERAL1
+CAP1293_STBY_CONF_REG								LITERAL1
+CAP1293_STBY_SENS_REG								LITERAL1
+CAP1293_STBY_THRSH_REG							LITERAL1
+
+CAP1293_BASE_COUNT_REG_1						LITERAL1
+# CAP1293_BASE_COUNT_1_REG					LITERAL1
+
+CAP1293_PWR_BTN_SEL_REG							LITERAL1
+CAP1293_PWR_BTN_CONF_REG						LITERAL1
+
+CAP1293_CALIB_CONF_REG							LITERAL1
+CAP1293_CALIB_MSB_REG_1							LITERAL1
+# CAP1293_CALIB_1_MSB_REG						LITERAL1
+CAP1293_CALIB_x_LSB_REG							LITERAL1
+
+CAP1293_PROD_ID_REG									LITERAL1
+CAP1293_MF_ID_REG										LITERAL1
+CAP1293_REV_REG											LITERAL1
+
+CAP1293_GEN_STATUS_BC_OUT_bits			LITERAL1
+CAP1293_GEN_STATUS_ACAL_FAIL_bits		LITERAL1
+CAP1293_GEN_STATUS_PWR_bits					LITERAL1
+CAP1293_GEN_STATUS_MULT_bits				LITERAL1
+CAP1293_GEN_STATUS_MTP_bits					LITERAL1
+CAP1293_GEN_STATUS_TOUCH_bits				LITERAL1
+
+CAP1293_SENS_ACTV_SENSE_bits				LITERAL1
+CAP1293_SENS_BASE_SHIFT_bits				LITERAL1
+
+CAP1293_MAIN_CTRL_GAIN_bits					LITERAL1
+CAP1293_MAIN_CTRL_STBY_bits					LITERAL1
+CAP1293_MAIN_CTRL_DSLEEP_bits				LITERAL1
+CAP1293_MAIN_CTRL_COMBO_GAIN_bits		LITERAL1
+CAP1293_MAIN_CTRL_COMBO_bits				LITERAL1
+CAP1293_MAIN_CTRL_INT_bits					LITERAL1
+
+CAP1293_CONF_1_TIMOUT_bits					LITERAL1
+CAP1293_CONF_1_DIS_DIG_NOISE_bits		LITERAL1
+CAP1293_CONF_1_DIS_LF_NOISE_bits		LITERAL1
+CAP1293_CONF_1_MAX_DUR_EN_bits			LITERAL1
+
+CAP1293_CONF_2_BC_OUT_RECAL_bits		LITERAL1
+CAP1293_CONF_2_BLK_PWR_CTRL_bits		LITERAL1
+CAP1293_CONF_2_BC_OUT_INT_bits			LITERAL1
+CAP1293_CONF_2_DIS_LF_FLAG_bits			LITERAL1
+CAP1293_CONF_2_DIS_RF_NOISE_bits		LITERAL1
+CAP1293_CONF_2_ACAL_FAIL_INT_bits		LITERAL1
+CAP1293_CONF_2_REL_INT_bits					LITERAL1
+
+CAP1293_GUARD_EN_FOR_3_bits					LITERAL1
+CAP1293_GUARD_EN_FOR_1_bits					LITERAL1
+
+CAP1293_TIMING_CONF_MAX_DUR_bits		LITERAL1
+CAP1293_TIMING_CONF_RPT_RATE_bits		LITERAL1
+
+CAP1293_SAMP_CONF_AVG_bits					LITERAL1
+CAP1293_SAMP_CONF_SAMP_TM_bits			LITERAL1
+CAP1293_SAMP_CONF_CYCL_TM_bits			LITERAL1
+
+CAP1293_MULT_CONF_EN_bits						LITERAL1
+CAP1293_MULT_CONF_TH_bits						LITERAL1
+CAP1293_PTRN_CONF_MTP_EN_bits				LITERAL1
+CAP1293_PTRN_CONF_MTP_TH_bits				LITERAL1
+CAP1293_PTRN_CONF_SOME_ANY_bits			LITERAL1
+CAP1293_PTRN_CONF_INT_EN_bits				LITERAL1
+
+CAP1293_RCLB_CONF_WR_ALL_THR_bits		LITERAL1
+# CAP1293_RCLB_CONF_CLR_INTD_bits		LITERAL1
+# CAP1293_RCLB_CONF_CLR_NEG_bits		LITERAL1
+CAP1293_RCLB_CONF_INTD_NEG_bits			LITERAL1
+CAP1293_RCLB_CONF_NEGDLT_CNT_bits		LITERAL1
+CAP1293_RCLB_CONF_CAL_CFG_bits			LITERAL1
+
+CAP1293_STBY_CONF_AVG_SUM_bits			LITERAL1
+CAP1293_STBY_CONF_SAMP_CNT_bits			LITERAL1
+CAP1293_STBY_CONF_SAMP_TM_bits			LITERAL1
+CAP1293_STBY_CONF_CYCL_TM_bits			LITERAL1
+
+CAP1293_PWR_BTN_CONF_STBY_EN_bits		LITERAL1
+CAP1293_PWR_BTN_CONF_STBY_TM_bits		LITERAL1
+CAP1293_PWR_BTN_CONF_ACTV_EN_bits		LITERAL1
+CAP1293_PWR_BTN_CONF_ACTV_TM_bits		LITERAL1
+
+CAP1293_CALIB_CONF_CALSEN_3_bits		LITERAL1
+CAP1293_CALIB_CONF_CALSEN_2_bits		LITERAL1
+CAP1293_CALIB_CONF_CALSEN_1_bits		LITERAL1
+
+CAP1293_ID_REG_DEFAULTS							LITERAL1
+CAP1293_MAIN_CTRL_DEFAULT						LITERAL1
+CAP1293_CONF_1_DEFAULT							LITERAL1
+CAP1293_CONF_2_DEFAULT							LITERAL1
+CAP1293_CYCL_TM_LIMITS							LITERAL1
+CAP1293_RPT_RATE_LIMITS							LITERAL1
+CAP1293_HOLD_THRSH_LIMITS						LITERAL1
+
+

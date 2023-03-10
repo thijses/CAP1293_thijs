@@ -1156,7 +1156,7 @@ class CAP1293_thijs : public _CAP1293_thijs_base
 
   CAP1293_ERR_RETURN_TYPE setBaseCountRaw(uint8_t sensorIndex, uint8_t newVal) { return(writeBytes(CAP1293_BASE_COUNT_REG_1 + CAP1293_constr_index(sensorIndex), &newVal, 1)); }
   uint8_t calcBaseCountRaw(uint16_t baseCountFull, uint8_t baseShift) { return(baseCountFull >> min(baseShift, (uint8_t)8)); }
-  uint16_t getBaseCountFull(uint8_t sensorIndex, uint16_t newVal) { return(setBaseCountRaw(sensorIndex, calcBaseCountRaw(newVal, getBaseShift()))); }
+  CAP1293_ERR_RETURN_TYPE setBaseCountFull(uint8_t sensorIndex, uint16_t newVal) { return(setBaseCountRaw(sensorIndex, calcBaseCountRaw(newVal, getBaseShift()))); }
 
   //note: NOT 3LSBits, this uses the sensorIndex directly
   CAP1293_ERR_RETURN_TYPE setPowerButtonSelect(uint8_t newVal) { return(writeBytes(CAP1293_PWR_BTN_SEL_REG, &newVal, 1)); } // (just a macro)
