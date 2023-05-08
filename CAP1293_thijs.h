@@ -68,7 +68,7 @@ Sensitivity:
   the analog gain can be set using CAP1293_MAIN_CTRL_GAIN_bits
   Except, when in Combo mode, which makes the Standby-enabled-sensors use CAP1293_MAIN_CTRL_COMBO_GAIN_bits instead
 - DELTA_SENSE is a (mediocrely documented / strangely implemented) secondary gain.
-  there are 2 DELTA_SENSE settings, one for Active mode and one for Standby, (CAP1293_SENS_ACTV_SENSE_bits in CAP1293_SENS_REG) and CAP1293_STBY_SENS_REG respectively
+  there are 2 DELTA_SENSE settings, one for Active mode and one for Standby, CAP1293_SENS_ACTV_SENSE_bits (in CAP1293_SENS_REG) and CAP1293_STBY_SENS_REG respectively
   This value will shift the delta count to the right before being stored in the register, so delta_count_reg = ((measurement_count-base_count)>>DELTA_SENSE)
   The touch threshold will be compared against the delta_count register value
 - Touch (binary) sensitivity is determined by a threshold applied to delta (not to the measurement).
