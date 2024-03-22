@@ -123,6 +123,8 @@ Hold (& repeat), Power-Button, Multi-Touch and Multi-Touch-Pattern:
 - Multi-Touch-Pattern (MTP) ...
 
 TODO:
+- getActiveTouchThreshRaw() should probably return int8_t (signed) instead of uint8_t. Test before push though!
+- make printConfig() function (mostly about the sensitivity settings)
 - finish Multiple-Touch & MTP documentation up here
 - function documentation (almost all)
 - EASY version (child class), stores: DELTA_SENSE (both), 
